@@ -43,30 +43,28 @@ A complete web-based system that analyzes crime data, detects hotspots using mac
 # Navigate to backend directory
 cd backend
 
-# Create virtual environment (recommended)
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (use 'py' on Windows)
+py -m pip install -r requirements.txt
 
 # Run setup script (creates database, generates data, trains models)
-python setup.py
+py setup.py
 ```
+
+**⚠️ Important for VS Code Users:**
+- Use `py` command instead of `python` on Windows
+- If you get "ModuleNotFoundError", select the correct Python interpreter:
+  1. Press `Ctrl + Shift + P`
+  2. Type "Python: Select Interpreter"
+  3. Choose Python 3.14 (not a venv from another project)
 
 ### Step 2: Start Backend Server
 
 ```bash
 # In the backend directory
-uvicorn app.main:app --reload --port 8000
+py -m uvicorn app.main:app --reload --port 8000
 ```
 
-The backend API will be available at: `http://localhost:8000`
+The backend API will be available at: `http://localhost:8000`  
 API Documentation (Swagger): `http://localhost:8000/docs`
 
 ### Step 3: Setup Frontend
@@ -88,51 +86,89 @@ npm run dev
 
 The frontend will be available at: `http://localhost:5173`
 
+---
+
+## 💻 Running in VS Code (Quick Start)
+
+### Option 1: Using the Startup Script (Easiest)
+Just double-click `start.bat` in File Explorer!
+
+### Option 2: Manual Start in VS Code
+
+**Terminal 1 (Backend):**
+```bash
+cd backend
+py -m uvicorn app.main:app --reload --port 8000
+```
+
+**Terminal 2 (Frontend):**
+```bash
+cd frontend
+npm run dev
+```
+
+Then open: http://localhost:5173
+
 ## 📁 Project Structure
 
 ```
 Crime Hotspot Detection and Prediction System/
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI entry point
-│   │   ├── database.py          # Database configuration
-│   │   ├── models/
-│   │   │   └── crime.py         # Crime data model
-│   │   ├── routes/
-│   │   │   ├── crimes.py        # Crime data endpoints
-│   │   │   ├── hotspots.py      # Hotspot detection endpoints
-│   │   │   └── predict.py       # Prediction endpoints
-│   │   ├── services/
-│   │   │   ├── preprocessing.py # Data preprocessing
-│   │   │   ├── hotspot_detection.py  # K-Means clustering
-│   │   │   └── prediction.py    # Random Forest prediction
-│   │   └── utils/
-│   │       ├── generate_data.py # Sample data generator
-│   │       └── model_trainer.py # Model training utility
-│   ├── requirements.txt         # Python dependencies
-│   ├── .env                     # Environment variables
-│   └── setup.py                 # Setup script
+├── 📄 README.md                           # Main documentation
+├── 📄 QUICKSTART.md                       # Quick start guide
+├── 📄 PROJECT_STRUCTURE.md               # Detailed file structure
+├── 🚀 start.bat                          # Windows startup script
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Sidebar.jsx      # Navigation sidebar
-│   │   │   └── Loading.jsx      # Loading component
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx    # Dashboard with charts
-│   │   │   ├── MapView.jsx      # Interactive map view
-│   │   │   ├── Prediction.jsx   # Crime prediction form
-│   │   │   └── DataView.jsx     # Data table view
-│   │   ├── services/
-│   │   │   └── api.js           # API integration
-│   │   ├── App.jsx              # Main app component
-│   │   ├── main.jsx             # React entry point
-│   │   └── index.css            # Global styles
-│   ├── package.json
-│   ├── vite.config.js
-│   └── tailwind.config.js
+├── 📂 backend/                           # Python FastAPI Backend
+│   ├── 📄 requirements.txt               # Python dependencies
+│   ├── 📄 .env                          # Environment variables
+│   ├── 📄 setup.py                      # Setup & initialization script
+│   ├── 📄 crime_data.db                 # SQLite database (auto-created)
+│   ├── 📄 fix_database.py               # Database fix utility
+│   │
+│   ├── 📂 app/
+│   │   ├── 📄 main.py                   # FastAPI entry point
+│   │   ├── 📄 database.py               # Database configuration
+│   │   ├── 📂 models/
+│   │   │   └── 📄 crime.py              # Crime data model
+│   │   ├── 📂 routes/
+│   │   │   ├── 📄 crimes.py             # Crime data endpoints
+│   │   │   ├── 📄 hotspots.py           # Hotspot detection endpoints
+│   │   │   └── 📄 predict.py            # Prediction endpoints
+│   │   ├── 📂 services/
+│   │   │   ├── 📄 preprocessing.py      # Data preprocessing
+│   │   │   ├── 📄 hotspot_detection.py  # K-Means clustering
+│   │   │   └── 📄 prediction.py         # Random Forest prediction
+│   │   └── 📂 utils/
+│   │       ├── 📄 generate_data.py      # Sample data generator
+│   │       └── 📄 model_trainer.py      # Model training utility
+│   │
+│   └── 📂 models/                        # Trained ML models (auto-created)
+│       ├── 📄 hotspot_model.pkl          # K-Means model
+│       ├── 📄 crime_prediction_model.pkl # Random Forest model
+│       └── 📄 label_encoder.pkl          # Label encoder
 │
-└── README.md
+└── 📂 frontend/                          # React Frontend
+    ├── 📄 package.json                   # Node dependencies
+    ├── 📄 vite.config.js                 # Vite configuration
+    ├── 📄 tailwind.config.js             # Tailwind CSS config
+    ├── 📄 postcss.config.js              # PostCSS config
+    ├── 📄 index.html                     # HTML entry point
+    │
+    └── 📂 src/
+        ├── 📄 main.jsx                   # React entry point
+        ├── 📄 App.jsx                    # Main app with routing
+        ├── 📄 index.css                  # Global styles
+        ├── 📂 components/
+        │   ├── 📄 Sidebar.jsx            # Navigation sidebar
+        │   └── 📄 Loading.jsx            # Loading spinner
+        ├── 📂 pages/
+        │   ├── 📄 Dashboard.jsx          # Dashboard with charts
+        │   ├── 📄 MapView.jsx            # Interactive map view
+        │   ├── 📄 Prediction.jsx         # Crime prediction form
+        │   └── 📄 DataView.jsx           # Data table view
+        ├── 📂 services/
+        │   └── 📄 api.js                 # API integration
+        └── 📂 hooks/                     # Custom hooks (extensible)
 ```
 
 ## 🔌 API Endpoints
@@ -232,23 +268,77 @@ server: {
 ## 🐛 Troubleshooting
 
 ### Backend Issues
-- **Port already in use**: Change port with `uvicorn app.main:app --reload --port 8001`
-- **Module not found**: Ensure you're in the backend directory and virtual environment is activated
-- **Database errors**: Delete `crime_data.db` and run `python setup.py` again
+
+**ModuleNotFoundError: No module named 'pandas' (or other packages)**
+- This happens when VS Code uses the wrong Python interpreter
+- **Fix**: Select the correct Python interpreter:
+  1. Press `Ctrl + Shift + P`
+  2. Type "Python: Select Interpreter"
+  3. Choose Python 3.14 (the one at `C:\Users\ybeka\AppData\Local\Programs\Python\Python314`)
+  4. **Do NOT** select a venv from another project
+- **Alternative**: Run `py -m pip install -r requirements.txt` in the backend directory
+
+**Port already in use**
+- Change port with: `py -m uvicorn app.main:app --reload --port 8001`
+
+**Database errors or empty data**
+- Run the fix script: `py fix_database.py`
+- Or recreate database: Delete `crime_data.db` and run `py setup.py`
+
+**Generate Sample Data button fails**
+- This was fixed! The database now includes the `id` column
+- If it happens again, run: `py fix_database.py`
 
 ### Frontend Issues
 - **Cannot connect to API**: Ensure backend is running on port 8000
 - **Map not showing**: Check internet connection (Leaflet loads tiles from CDN)
-- **Dependencies error**: Delete `node_modules` and run `npm install` again
+- **Dependencies error**: Delete `node_modules` folder and run `npm install` again
+- **Blank page**: Check browser console (F12) for errors
+
+### Database Issues
+
+**Database is empty or missing columns**
+```bash
+cd backend
+py fix_database.py
+```
+
+**View database contents**
+```bash
+cd backend
+py view_database.py
+```
 
 ## 📝 Usage Guide
 
 1. **Start both servers** (backend and frontend)
+   - Use `start.bat` for automatic startup, OR
+   - Manually start both terminals as shown above
 2. **Generate sample data** from the Data Table page (or it auto-generates on setup)
 3. **View dashboard** to see crime statistics
 4. **Explore map** to see hotspot clusters
 5. **Make predictions** using the Prediction page
 6. **Upload your own data** using CSV format with columns: crime_type, latitude, longitude, date
+
+## 📊 Database Information
+
+**Location**: `backend/crime_data.db`
+
+**Contents**:
+- 500 sample crime records (after running setup.py)
+- Columns: id, crime_type, latitude, longitude, date, hour, day, month, hotspot_cluster
+
+**View Database**:
+```bash
+cd backend
+py view_database.py
+```
+
+**Fix Database** (if corrupted):
+```bash
+cd backend
+py fix_database.py
+```
 
 ## 🎯 Future Enhancements
 
@@ -268,6 +358,19 @@ This project is built for educational and demonstration purposes.
 ## 👨‍💻 Developer
 
 Built with ❤️ using FastAPI, React, and Machine Learning
+
+---
+
+## 🛠️ Helper Scripts
+
+The project includes several helpful scripts:
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `start.bat` | Start both servers automatically | Double-click in File Explorer |
+| `setup.py` | Initialize database and train models | `py setup.py` |
+| `fix_database.py` | Fix database schema issues | `py fix_database.py` |
+| `view_database.py` | View database contents | `py view_database.py` |
 
 ---
 

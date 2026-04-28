@@ -1,0 +1,30 @@
+# Node dependencies
+frontend/node_modules/
+
+# Python cache and environment
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+*.env
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# IDE config
+.vscode/
+.idea/
+
+# Database files
+*.sqlite3
+*.db

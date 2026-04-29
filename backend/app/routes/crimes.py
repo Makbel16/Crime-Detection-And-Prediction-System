@@ -17,20 +17,83 @@ from app.services.preprocessing import preprocess_crime_data
 router = APIRouter(prefix="/crimes", tags=["Crimes"])
 
 @router.get("/")
-async def get_crimes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def get_crimes(
+    skip: int = 0, 
+    limit: int = 100, 
+    search: str = None,
+    crime_type: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    start_hour: int = None,
+    end_hour: int = None,
+    day: int = None,
+    month: int = None,
+    hotspot_cluster: int = None,
+    db: Session = Depends(get_db)
+):
     """
-    Get all crime records with pagination
+    Get crime records with pagination, search and filtering
     
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
+        search: Search term for crime type (partial match)
+        crime_type: Filter by exact crime type
+        start_date: Filter crimes from this date (YYYY-MM-DD)
+        end_date: Filter crimes until this date (YYYY-MM-DD)
+        start_hour: Filter crimes from this hour (0-23)
+        end_hour: Filter crimes until this hour (0-23)
+        day: Filter by day of week (0=Monday, 6=Sunday)
+        month: Filter by month (1-12)
+        hotspot_cluster: Filter by hotspot cluster number
     
     Returns:
-        List of crime records
+        List of crime records with applied filters
     """
     try:
-        crimes = db.query(Crime).offset(skip).limit(limit).all()
-        total = db.query(Crime).count()
+        query = db.query(Crime)
+        
+        # Apply search filter (partial match on crime_type)
+        if search:
+            query = query.filter(Crime.crime_type.ilike(f"%{search}%"))
+        
+        # Apply exact crime type filter
+        if crime_type:
+            query = query.filter(Crime.crime_type == crime_type)
+        
+        # Apply date range filters
+        if start_date:
+            start_datetime = datetime.fromisoformat(start_date)
+            query = query.filter(Crime.date >= start_datetime)
+        if end_date:
+            end_datetime = datetime.fromisoformat(end_date)
+            # Set to end of day
+            end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
+            query = query.filter(Crime.date <= end_datetime)
+        
+        # Apply hour range filters
+        if start_hour is not None:
+            query = query.filter(Crime.hour >= start_hour)
+        if end_hour is not None:
+            query = query.filter(Crime.hour <= end_hour)
+        
+        # Apply day filter
+        if day is not None:
+            query = query.filter(Crime.day == day)
+        
+        # Apply month filter
+        if month is not None:
+            query = query.filter(Crime.month == month)
+        
+        # Apply hotspot cluster filter
+        if hotspot_cluster is not None:
+            query = query.filter(Crime.hotspot_cluster == hotspot_cluster)
+        
+        # Get total count with filters applied
+        total = query.count()
+        
+        # Apply pagination
+        crimes = query.offset(skip).limit(limit).all()
         
         return {
             "data": [

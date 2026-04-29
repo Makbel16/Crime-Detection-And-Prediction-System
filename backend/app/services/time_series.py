@@ -143,17 +143,20 @@ class TimeSeriesAnalyzer:
         df = pd.DataFrame({'date': dates})
         df['date'] = pd.to_datetime(df['date'])
         df = df.set_index('date')
-        df = df.resample('M').size()
+        df = df.resample('M').size().asfreq('M', fill_value=0)
+
+        if len(df) < 24:
+            return {"error": "Insufficient data for seasonal analysis (need at least 24 monthly periods)"}
 
         # Seasonal decomposition
         try:
             decomposition = seasonal_decompose(df, model='additive', period=12)
 
             seasonal_data = {
-                "observed": [x if not np.isnan(x) else 0.0 for x in decomposition.observed.tolist()],
-                "trend": [x if not np.isnan(x) else 0.0 for x in decomposition.trend.tolist()],
-                "seasonal": [x if not np.isnan(x) else 0.0 for x in decomposition.seasonal.tolist()],
-                "residual": [x if not np.isnan(x) else 0.0 for x in decomposition.resid.tolist()],
+                "observed": [float(x) if not np.isnan(x) else 0.0 for x in decomposition.observed.tolist()],
+                "trend": [float(x) if not np.isnan(x) else 0.0 for x in decomposition.trend.tolist()],
+                "seasonal": [float(x) if not np.isnan(x) else 0.0 for x in decomposition.seasonal.tolist()],
+                "residual": [float(x) if not np.isnan(x) else 0.0 for x in decomposition.resid.tolist()],
                 "dates": [d.strftime('%Y-%m') for d in decomposition.observed.index]
             }
 
@@ -186,7 +189,10 @@ class TimeSeriesAnalyzer:
         df = pd.DataFrame({'date': dates})
         df['date'] = pd.to_datetime(df['date'])
         df = df.set_index('date')
-        monthly_crimes = df.resample('M').size()
+        monthly_crimes = df.resample('M').size().asfreq('M', fill_value=0)
+
+        if len(monthly_crimes) < 24:
+            return {"error": "Insufficient data for prediction (need at least 24 monthly periods)"}
 
         try:
             # Fit ARIMA model
@@ -206,10 +212,10 @@ class TimeSeriesAnalyzer:
 
             predictions = {
                 "dates": [d.strftime('%Y-%m') for d in future_dates],
-                "predicted_crimes": [x if not np.isnan(x) else 0.0 for x in forecast.tolist()],
+                "predicted_crimes": [float(x) if not np.isnan(x) else 0.0 for x in forecast.tolist()],
                 "confidence_intervals": {
-                    "lower": [x if not np.isnan(x) else 0.0 for x in (forecast - 1.96 * np.sqrt(model_fit.mse)).tolist()],
-                    "upper": [x if not np.isnan(x) else 0.0 for x in (forecast + 1.96 * np.sqrt(model_fit.mse)).tolist()]
+                    "lower": [float(x) if not np.isnan(x) else 0.0 for x in (forecast - 1.96 * np.sqrt(model_fit.mse)).tolist()],
+                    "upper": [float(x) if not np.isnan(x) else 0.0 for x in (forecast + 1.96 * np.sqrt(model_fit.mse)).tolist()]
                 }
             }
 

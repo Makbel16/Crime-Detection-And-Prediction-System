@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Map, Brain, Database } from 'lucide-react';
+import { LayoutDashboard, Map, Brain, Database, TrendingUp } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();

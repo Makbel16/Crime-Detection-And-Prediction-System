@@ -12,7 +12,7 @@ import os
 load_dotenv()
 
 # Import routes
-from app.routes import crimes, hotspots, predict
+from app.routes import crimes, hotspots, predict, trends
 
 # Create FastAPI app instance
 app = FastAPI(
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(crimes.router, prefix="/api", tags=["Crimes"])
 app.include_router(hotspots.router, prefix="/api", tags=["Hotspots"])
 app.include_router(predict.router, prefix="/api", tags=["Prediction"])
+app.include_router(trends.router, prefix="/api", tags=["Trends"])
 
 @app.get("/")
 async def root():

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import MapView from './pages/MapView';
 import Prediction from './pages/Prediction';
 import DataView from './pages/DataView';
+import Trends from './pages/Trends';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/map" element={<MapView />} />
             <Route path="/prediction" element={<Prediction />} />
             <Route path="/data" element={<DataView />} />
+            <Route path="/trends" element={<Trends />} />
           </Routes>
         </div>
       </div>

@@ -8,7 +8,6 @@ import numpy as np
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from sqlalchemy.orm import Session
-from app.database import get_db
 from app.models.crime import Crime
 import statsmodels.api as sm
 from statsmodels.tsa.arima.model import ARIMA
@@ -21,8 +20,8 @@ class TimeSeriesAnalyzer:
     Time-series analysis for crime data trends and predictions
     """
 
-    def __init__(self):
-        self.db: Session = next(get_db())
+    def __init__(self, db: Session):
+        self.db: Session = db
 
     def get_monthly_trends(self, start_date: str = None, end_date: str = None) -> Dict[str, Any]:
         """

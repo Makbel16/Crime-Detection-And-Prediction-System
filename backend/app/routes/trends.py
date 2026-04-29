@@ -3,8 +3,10 @@ Time-Series Analysis Routes
 API endpoints for trend analysis and predictions
 """
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import Optional
+from sqlalchemy.orm import Session
+from app.database import get_db
 from app.services.time_series import TimeSeriesAnalyzer
 
 router = APIRouter(prefix="/trends", tags=["Trends"])
@@ -12,7 +14,8 @@ router = APIRouter(prefix="/trends", tags=["Trends"])
 @router.get("/monthly")
 async def get_monthly_trends(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)")
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    db: Session = Depends(get_db)
 ):
     """
     Get monthly crime trends
@@ -25,7 +28,7 @@ async def get_monthly_trends(
         Monthly trend data
     """
     try:
-        analyzer = TimeSeriesAnalyzer()
+        analyzer = TimeSeriesAnalyzer(db)
         result = analyzer.get_monthly_trends(start_date, end_date)
 
         if "error" in result:
@@ -38,7 +41,8 @@ async def get_monthly_trends(
 @router.get("/yearly")
 async def get_yearly_trends(
     start_year: Optional[int] = Query(None, description="Start year"),
-    end_year: Optional[int] = Query(None, description="End year")
+    end_year: Optional[int] = Query(None, description="End year"),
+    db: Session = Depends(get_db)
 ):
     """
     Get yearly crime trends
@@ -51,7 +55,7 @@ async def get_yearly_trends(
         Yearly trend data
     """
     try:
-        analyzer = TimeSeriesAnalyzer()
+        analyzer = TimeSeriesAnalyzer(db)
         result = analyzer.get_yearly_trends(start_year, end_year)
 
         if "error" in result:
@@ -62,7 +66,7 @@ async def get_yearly_trends(
         raise HTTPException(status_code=500, detail=f"Error fetching yearly trends: {str(e)}")
 
 @router.get("/seasonal")
-async def get_seasonal_analysis():
+async def get_seasonal_analysis(db: Session = Depends(get_db)):
     """
     Get seasonal analysis of crime patterns
 
@@ -70,7 +74,7 @@ async def get_seasonal_analysis():
         Seasonal decomposition data
     """
     try:
-        analyzer = TimeSeriesAnalyzer()
+        analyzer = TimeSeriesAnalyzer(db)
         result = analyzer.get_seasonal_analysis()
 
         if "error" in result:
@@ -82,7 +86,8 @@ async def get_seasonal_analysis():
 
 @router.get("/predict")
 async def predict_future_patterns(
-    months_ahead: int = Query(12, description="Number of months to predict", ge=1, le=60)
+    months_ahead: int = Query(12, description="Number of months to predict", ge=1, le=60),
+    db: Session = Depends(get_db)
 ):
     """
     Predict future crime patterns
@@ -94,7 +99,7 @@ async def predict_future_patterns(
         Future crime predictions
     """
     try:
-        analyzer = TimeSeriesAnalyzer()
+        analyzer = TimeSeriesAnalyzer(db)
         result = analyzer.predict_future_patterns(months_ahead)
 
         if "error" in result:
@@ -106,7 +111,8 @@ async def predict_future_patterns(
 
 @router.get("/crime-types")
 async def get_crime_type_trends(
-    crime_type: Optional[str] = Query(None, description="Specific crime type to analyze")
+    crime_type: Optional[str] = Query(None, description="Specific crime type to analyze"),
+    db: Session = Depends(get_db)
 ):
     """
     Get trends for specific crime types
@@ -118,7 +124,7 @@ async def get_crime_type_trends(
         Crime type specific trends
     """
     try:
-        analyzer = TimeSeriesAnalyzer()
+        analyzer = TimeSeriesAnalyzer(db)
         result = analyzer.get_crime_type_trends(crime_type)
 
         if "error" in result:
@@ -129,7 +135,7 @@ async def get_crime_type_trends(
         raise HTTPException(status_code=500, detail=f"Error fetching crime type trends: {str(e)}")
 
 @router.get("/summary")
-async def get_trends_summary():
+async def get_trends_summary(db: Session = Depends(get_db)):
     """
     Get comprehensive trends summary
 
@@ -137,7 +143,7 @@ async def get_trends_summary():
         Summary of all trend analyses
     """
     try:
-        analyzer = TimeSeriesAnalyzer()
+        analyzer = TimeSeriesAnalyzer(db)
 
         monthly = analyzer.get_monthly_trends()
         yearly = analyzer.get_yearly_trends()

@@ -6,6 +6,7 @@ Sets up SQLAlchemy connection with SQLite database
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 import os
 from dotenv import load_dotenv
 
@@ -16,10 +17,17 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crime_data.db")
 
 # Create SQLAlchemy engine
-# SQLite doesn't need check_same_thread, but other databases do
+# Use a StaticPool for SQLite to avoid connection pool exhaustion in a multi-threaded FastAPI app
+engine_args = {}
+if "sqlite" in DATABASE_URL:
+    engine_args["connect_args"] = {"check_same_thread": False}
+    engine_args["poolclass"] = StaticPool
+else:
+    engine_args["pool_pre_ping"] = True
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    **engine_args
 )
 
 # Create session factory

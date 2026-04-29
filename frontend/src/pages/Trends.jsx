@@ -34,6 +34,10 @@ const Trends = () => {
   const [yearlyData, setYearlyData] = useState(null);
   const [seasonalData, setSeasonalData] = useState(null);
   const [predictions, setPredictions] = useState(null);
+  const [monthlyError, setMonthlyError] = useState(null);
+  const [yearlyError, setYearlyError] = useState(null);
+  const [seasonalError, setSeasonalError] = useState(null);
+  const [predictionError, setPredictionError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('monthly');
 
@@ -42,24 +46,50 @@ const Trends = () => {
   }, []);
 
   const fetchAllTrends = async () => {
-    try {
-      setLoading(true);
-      const [monthlyRes, yearlyRes, seasonalRes, predictRes] = await Promise.all([
-        trendsAPI.getMonthlyTrends(),
-        trendsAPI.getYearlyTrends(),
-        trendsAPI.getSeasonalAnalysis(),
-        trendsAPI.getFuturePredictions()
-      ]);
+    setLoading(true);
+    setMonthlyError(null);
+    setYearlyError(null);
+    setSeasonalError(null);
+    setPredictionError(null);
 
-      setMonthlyData(monthlyRes.data);
-      setYearlyData(yearlyRes.data);
-      setSeasonalData(seasonalRes.data);
-      setPredictions(predictRes.data);
-    } catch (error) {
-      console.error('Error fetching trends:', error);
-    } finally {
-      setLoading(false);
+    const requests = [
+      trendsAPI.getMonthlyTrends(),
+      trendsAPI.getYearlyTrends(),
+      trendsAPI.getSeasonalAnalysis(),
+      trendsAPI.getFuturePredictions()
+    ];
+
+    const results = await Promise.allSettled(requests);
+
+    if (results[0].status === 'fulfilled') {
+      setMonthlyData(results[0].value.data);
+    } else {
+      console.error('Monthly trends failed:', results[0].reason);
+      setMonthlyError('Unable to load monthly trends.');
     }
+
+    if (results[1].status === 'fulfilled') {
+      setYearlyData(results[1].value.data);
+    } else {
+      console.error('Yearly trends failed:', results[1].reason);
+      setYearlyError('Unable to load yearly trends.');
+    }
+
+    if (results[2].status === 'fulfilled') {
+      setSeasonalData(results[2].value.data);
+    } else {
+      console.error('Seasonal analysis failed:', results[2].reason);
+      setSeasonalError('Unable to load seasonal analysis.');
+    }
+
+    if (results[3].status === 'fulfilled') {
+      setPredictions(results[3].value.data);
+    } else {
+      console.error('Future predictions failed:', results[3].reason);
+      setPredictionError('Unable to load future predictions.');
+    }
+
+    setLoading(false);
   };
 
   if (loading) {
@@ -210,96 +240,144 @@ const Trends = () => {
 
       {/* Content */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        {activeTab === 'monthly' && monthlyData && (
+        {activeTab === 'monthly' && (
           <div>
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
               Monthly Crime Trends
             </h2>
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Total Crimes: <span className="font-semibold">{monthlyData.total_crimes}</span> |
-                Time Periods: <span className="font-semibold">{monthlyData.periods}</span>
-              </p>
-            </div>
-            <div className="h-96">
-              <Line data={monthlyChartData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'yearly' && yearlyData && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Yearly Crime Trends
-            </h2>
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Total Crimes: <span className="font-semibold">{yearlyData.total_crimes}</span> |
-                Years Analyzed: <span className="font-semibold">{yearlyData.years}</span>
-              </p>
-            </div>
-            <div className="h-96">
-              <Bar data={yearlyChartData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'seasonal' && seasonalData && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Seasonal Analysis
-            </h2>
-            {seasonalData.error ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">{seasonalData.error}</p>
+            {monthlyError ? (
+              <div className="text-center py-12">
+                <p className="text-red-500 dark:text-red-400">{monthlyError}</p>
               </div>
-            ) : (
+            ) : monthlyData ? (
               <>
                 <div className="mb-4">
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Total Periods: <span className="font-semibold">{seasonalData.total_periods}</span> |
-                    Seasonal Strength: <span className="font-semibold">{(seasonalData.seasonal_strength * 100).toFixed(1)}%</span>
+                    Total Crimes: <span className="font-semibold">{monthlyData.total_crimes}</span> |
+                    Time Periods: <span className="font-semibold">{monthlyData.periods}</span>
                   </p>
                 </div>
                 <div className="h-96">
-                  <Line data={seasonalChartData} options={chartOptions} />
+                  <Line data={monthlyChartData} options={chartOptions} />
                 </div>
               </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">No monthly trend data available.</p>
+              </div>
             )}
           </div>
         )}
 
-        {activeTab === 'predictions' && predictions && (
+        {activeTab === 'yearly' && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Yearly Crime Trends
+            </h2>
+            {yearlyError ? (
+              <div className="text-center py-12">
+                <p className="text-red-500 dark:text-red-400">{yearlyError}</p>
+              </div>
+            ) : yearlyData ? (
+              <>
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Total Crimes: <span className="font-semibold">{yearlyData.total_crimes}</span> |
+                    Years Analyzed: <span className="font-semibold">{yearlyData.years}</span>
+                  </p>
+                </div>
+                <div className="h-96">
+                  <Bar data={yearlyChartData} options={chartOptions} />
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">No yearly trend data available.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'seasonal' && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Seasonal Analysis
+            </h2>
+            {seasonalError ? (
+              <div className="text-center py-12">
+                <p className="text-red-500 dark:text-red-400">{seasonalError}</p>
+              </div>
+            ) : seasonalData ? (
+              <>
+                {seasonalData.error ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">{seasonalData.error}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Total Periods: <span className="font-semibold">{seasonalData.total_periods}</span> |
+                        Seasonal Strength: <span className="font-semibold">{(seasonalData.seasonal_strength * 100).toFixed(1)}%</span>
+                      </p>
+                    </div>
+                    <div className="h-96">
+                      <Line data={seasonalChartData} options={chartOptions} />
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">No seasonal analysis data available.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'predictions' && (
           <div>
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
               Future Crime Predictions
             </h2>
-            {predictions.error ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">{predictions.error}</p>
+            {predictionError ? (
+              <div className="text-center py-12">
+                <p className="text-red-500 dark:text-red-400">{predictionError}</p>
               </div>
-            ) : (
+            ) : predictions ? (
               <>
-                <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Model Metrics</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      AIC: <span className="font-mono">{predictions.aic.toFixed(2)}</span><br />
-                      BIC: <span className="font-mono">{predictions.bic.toFixed(2)}</span>
-                    </p>
+                {predictions.error ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">{predictions.error}</p>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Prediction Details</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Forecasting: <span className="font-semibold">{predictions.future_predictions.dates.length} months</span><br />
-                      Confidence intervals included
-                    </p>
-                  </div>
-                </div>
-                <div className="h-96">
-                  <Line data={predictionChartData} options={chartOptions} />
-                </div>
+                ) : (
+                  <>
+                    <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Model Metrics</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          AIC: <span className="font-mono">{predictions.aic.toFixed(2)}</span><br />
+                          BIC: <span className="font-mono">{predictions.bic.toFixed(2)}</span>
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Prediction Details</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          Forecasting: <span className="font-semibold">{predictions.future_predictions.dates.length} months</span><br />
+                          Confidence intervals included
+                        </p>
+                      </div>
+                    </div>
+                    <div className="h-96">
+                      <Line data={predictionChartData} options={chartOptions} />
+                    </div>
+                  </>
+                )}
               </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">No prediction data available.</p>
+              </div>
             )}
           </div>
         )}

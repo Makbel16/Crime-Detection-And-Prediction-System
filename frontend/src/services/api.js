@@ -95,4 +95,42 @@ export const predictionAPI = {
     api.get('/predict/feature-importance'),
 };
 
+// Trends APIs
+export const trendsAPI = {
+  // Get monthly trends
+  getMonthlyTrends: (startDate, endDate) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    return api.get(`/trends/monthly?${params.toString()}`);
+  },
+  
+  // Get yearly trends
+  getYearlyTrends: (startYear, endYear) => {
+    const params = new URLSearchParams();
+    if (startYear) params.append('start_year', startYear);
+    if (endYear) params.append('end_year', endYear);
+    return api.get(`/trends/yearly?${params.toString()}`);
+  },
+  
+  // Get seasonal analysis
+  getSeasonalAnalysis: () => 
+    api.get('/trends/seasonal'),
+  
+  // Get future predictions
+  getFuturePredictions: (monthsAhead = 12) => 
+    api.get(`/trends/predict?months_ahead=${monthsAhead}`),
+  
+  // Get crime type trends
+  getCrimeTypeTrends: (crimeType) => {
+    const params = new URLSearchParams();
+    if (crimeType) params.append('crime_type', crimeType);
+    return api.get(`/trends/crime-types?${params.toString()}`);
+  },
+  
+  // Get trends summary
+  getTrendsSummary: () => 
+    api.get('/trends/summary'),
+};
+
 export default api;

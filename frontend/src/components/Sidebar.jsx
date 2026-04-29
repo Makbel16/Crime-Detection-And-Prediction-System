@@ -9,6 +9,7 @@ const Sidebar = () => {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/map', icon: Map, label: 'Map View' },
     { path: '/prediction', icon: Brain, label: 'Prediction' },
+    { path: '/trends', icon: TrendingUp, label: 'Trends Analysis' },
     { path: '/data', icon: Database, label: 'Data Table' },
   ];
 

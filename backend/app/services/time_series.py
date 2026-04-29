@@ -69,6 +69,9 @@ class TimeSeriesAnalyzer:
 
         # Calculate trends
         monthly_data['trend'] = monthly_data['count'].pct_change() * 100
+        
+        # Handle NaN values for JSON serialization
+        monthly_data['trend'] = monthly_data['trend'].fillna(0.0)
 
         return {
             "monthly_trends": monthly_data.to_dict('records'),
@@ -112,6 +115,9 @@ class TimeSeriesAnalyzer:
 
         # Calculate year-over-year growth
         yearly_data['yoy_growth'] = yearly_data['count'].pct_change() * 100
+        
+        # Handle NaN values for JSON serialization
+        yearly_data['yoy_growth'] = yearly_data['yoy_growth'].fillna(0.0)
 
         return {
             "yearly_trends": yearly_data.to_dict('records'),
@@ -144,10 +150,10 @@ class TimeSeriesAnalyzer:
             decomposition = seasonal_decompose(df, model='additive', period=12)
 
             seasonal_data = {
-                "observed": decomposition.observed.tolist(),
-                "trend": decomposition.trend.tolist(),
-                "seasonal": decomposition.seasonal.tolist(),
-                "residual": decomposition.resid.tolist(),
+                "observed": [x if not np.isnan(x) else 0.0 for x in decomposition.observed.tolist()],
+                "trend": [x if not np.isnan(x) else 0.0 for x in decomposition.trend.tolist()],
+                "seasonal": [x if not np.isnan(x) else 0.0 for x in decomposition.seasonal.tolist()],
+                "residual": [x if not np.isnan(x) else 0.0 for x in decomposition.resid.tolist()],
                 "dates": [d.strftime('%Y-%m') for d in decomposition.observed.index]
             }
 
@@ -200,10 +206,10 @@ class TimeSeriesAnalyzer:
 
             predictions = {
                 "dates": [d.strftime('%Y-%m') for d in future_dates],
-                "predicted_crimes": forecast.tolist(),
+                "predicted_crimes": [x if not np.isnan(x) else 0.0 for x in forecast.tolist()],
                 "confidence_intervals": {
-                    "lower": (forecast - 1.96 * np.sqrt(model_fit.mse)).tolist(),
-                    "upper": (forecast + 1.96 * np.sqrt(model_fit.mse)).tolist()
+                    "lower": [x if not np.isnan(x) else 0.0 for x in (forecast - 1.96 * np.sqrt(model_fit.mse)).tolist()],
+                    "upper": [x if not np.isnan(x) else 0.0 for x in (forecast + 1.96 * np.sqrt(model_fit.mse)).tolist()]
                 }
             }
 

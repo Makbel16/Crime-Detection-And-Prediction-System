@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Line, Bar, Area } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +10,6 @@ import {
   Title,
   Tooltip,
   Legend,
-  AreaElement,
   Filler,
 } from 'chart.js';
 import Loading from '../components/Loading';
@@ -24,7 +23,6 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
-  AreaElement,
   Title,
   Tooltip,
   Legend,
@@ -224,7 +222,7 @@ const Trends = () => {
               </p>
             </div>
             <div className="h-96">
-              <Area data={monthlyChartData} options={chartOptions} />
+              <Line data={monthlyChartData} options={chartOptions} />
             </div>
           </div>
         )}
@@ -299,7 +297,7 @@ const Trends = () => {
                   </div>
                 </div>
                 <div className="h-96">
-                  <Area data={predictionChartData} options={chartOptions} />
+                  <Line data={predictionChartData} options={chartOptions} />
                 </div>
               </>
             )}
